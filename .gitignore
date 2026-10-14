@@ -1,0 +1,11 @@
+# Maven / Java
+target/
+*.class
+
+# Editores
+.idea/
+*.iml
+out/
+.vscode/
+*.swp
+.DS_Store
