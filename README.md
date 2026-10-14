@@ -8,6 +8,11 @@ JavaFX 21 · JDK 21 · Maven 3.9.
 | [`1_javafx-base`](1_javafx-base) | Proyecto base con Maven: `Application`, `Stage`, `Scene`, `Label` | [`doc/JavaFX-Base-Guia.pdf`](1_javafx-base/doc/JavaFX-Base-Guia.pdf) |
 | [`2_javafx-fxml`](2_javafx-fxml) | Vista con FXML + controlador, Scene Builder y login | [`doc/JavaFX-FXML-Guia.pdf`](2_javafx-fxml/doc/JavaFX-FXML-Guia.pdf) |
 
+## Guías de ejercicios
+| Guía | Tema | Enunciado |
+|---|---|---|
+| Guía 1 | Lista de usuarios (agregar y eliminar) con FXML | [`guias/Guia_1_Usuarios.pdf`](guias/Guia_1_Usuarios.pdf) |
+
 ## Ejecutar un proyecto
 ```
 cd 1_javafx-base      # o 2_javafx-fxml
