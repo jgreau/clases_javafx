@@ -7,6 +7,7 @@ JavaFX 21 · JDK 21 · Maven 3.9.
 |---|---|---|
 | [`1_javafx-base`](1_javafx-base) | Proyecto base con Maven: `Application`, `Stage`, `Scene`, `Label` | [`doc/JavaFX-Base-Guia.pdf`](1_javafx-base/doc/JavaFX-Base-Guia.pdf) |
 | [`2_javafx-fxml`](2_javafx-fxml) | Vista con FXML + controlador, Scene Builder y login | [`doc/JavaFX-FXML-Guia.pdf`](2_javafx-fxml/doc/JavaFX-FXML-Guia.pdf) |
+| [`3_javafx-table`](3_javafx-table) | Formulario + `TableView` observable + persistencia en JSON con Gson (proyecto base) | [`doc/JavaFX-Table-Guia.pdf`](3_javafx-table/doc/JavaFX-Table-Guia.pdf) |
 
 ## Guías de ejercicios
 | Guía | Tema | Enunciado |
@@ -15,7 +16,7 @@ JavaFX 21 · JDK 21 · Maven 3.9.
 
 ## Ejecutar un proyecto
 ```
-cd 1_javafx-base      # o 2_javafx-fxml
+cd 1_javafx-base      # o 2_javafx-fxml, 3_javafx-table
 mvn javafx:run
 ```
 Requisitos: JDK 21 y Maven 3.9+ (o el Maven integrado de IntelliJ). Los pasos de instalación están en la guía del proyecto 1.

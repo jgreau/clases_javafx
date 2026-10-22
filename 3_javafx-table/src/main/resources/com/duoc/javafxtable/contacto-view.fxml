@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="12.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.duoc.javafxtable.ContactoController">
+   <padding>
+      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+   </padding>
+   <children>
+      <Label text="Contactos" style="-fx-font-size: 20px; -fx-font-weight: bold;" />
+
+      <!-- PASO 5 (guía): agregar aquí, en este orden:
+           1. Un GridPane con 4 Label + 4 TextField (nombre, apellido, correo, teléfono), cada TextField con fx:id.
+           2. Un HBox con 3 Button: Agregar, Eliminar y Guardar (cada uno con onAction y el Eliminar con fx:id).
+           3. Un Label con fx:id="mensajeLabel" para mostrar errores y avisos.
+           4. Un TableView con fx:id="tabla" y 4 TableColumn (cada una con fx:id). -->
+   </children>
+</VBox>
