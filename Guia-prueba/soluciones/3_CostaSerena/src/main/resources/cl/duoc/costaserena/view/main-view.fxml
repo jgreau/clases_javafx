@@ -19,7 +19,7 @@
    <padding>
       <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
    </padding>
-   <Label text="Hotel Costa Serena: registro de habitaciones" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+   <Label text="Hotel Costa Serena: registro de habitaciones" />
    <GridPane hgap="10.0" vgap="8.0">
       <columnConstraints>
          <ColumnConstraints minWidth="150.0" />
@@ -42,12 +42,12 @@
       <TextField fx:id="txtPiso" GridPane.columnIndex="3" GridPane.rowIndex="1" />
       <Label text="Capacidad (huéspedes)" GridPane.columnIndex="0" GridPane.rowIndex="2" />
       <TextField fx:id="txtCapacidad" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-      <Label text="Datos de la habitación suite" GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.columnSpan="4" style="-fx-font-weight: bold;" />
+      <Label text="Datos de la habitación suite" GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.columnSpan="4" />
       <Label text="Vista" GridPane.columnIndex="0" GridPane.rowIndex="4" />
       <TextField fx:id="txtVista" GridPane.columnIndex="1" GridPane.rowIndex="4" />
       <CheckBox fx:id="chkDesayunoBuffet" mnemonicParsing="false" text="Incluye desayuno buffet" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="4" />
       <CheckBox fx:id="chkLateCheckout" mnemonicParsing="false" text="Late checkout activo" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="5" />
-      <Label text="Datos de la habitación estándar" GridPane.columnIndex="0" GridPane.rowIndex="6" GridPane.columnSpan="4" style="-fx-font-weight: bold;" />
+      <Label text="Datos de la habitación estándar" GridPane.columnIndex="0" GridPane.rowIndex="6" GridPane.columnSpan="4" />
       <Label text="Camas adicionales" GridPane.columnIndex="0" GridPane.rowIndex="7" />
       <TextField fx:id="txtCamasAdicionales" GridPane.columnIndex="1" GridPane.rowIndex="7" />
    </GridPane>

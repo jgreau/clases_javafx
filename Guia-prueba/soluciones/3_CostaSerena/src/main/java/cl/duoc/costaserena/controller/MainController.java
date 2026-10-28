@@ -1,6 +1,6 @@
 package cl.duoc.costaserena.controller;
 
-import cl.duoc.costaserena.dao.JsonDao;
+import cl.duoc.costaserena.dao.HabitacionJsonDao;
 import cl.duoc.costaserena.dao.PersistenciaException;
 import cl.duoc.costaserena.model.Habitacion;
 import cl.duoc.costaserena.model.HabitacionSuite;
@@ -31,11 +31,12 @@ public class MainController {
 
     private static final String TIPO_HABITACION_SUITE = "Habitación Suite";
     private static final String TIPO_HABITACION_ESTANDAR = "Habitación Estándar";
+    // Configuración regional de Chile: coma para los decimales y punto para los miles.
     private static final Locale CHILE = Locale.forLanguageTag("es-CL");
+    // Formato de dinero: "$#,##0" muestra 21989 como $21.989.
     private static final DecimalFormat FORMATO_MONEDA = new DecimalFormat("$#,##0", DecimalFormatSymbols.getInstance(CHILE));
-    private static final String COLOR_OK = "-fx-text-fill: #1b5e20;";
-    private static final String COLOR_ERROR = "-fx-text-fill: #b71c1c;";
 
+    // Controles de la vista (main-view.fxml). Cada atributo @FXML debe llamarse igual que su fx:id.
     @FXML private ComboBox<String> cbTipo;
     @FXML private TextField txtNumero;
     @FXML private TextField txtPiso;
@@ -52,14 +53,15 @@ public class MainController {
     @FXML private TableColumn<Habitacion, String> colCosto;
     @FXML private Label lblMensaje;
 
-    private final HabitacionRepository repositorio = new HabitacionRepository(
-            new JsonDao<>("habitaciones_suite.json", HabitacionSuite.class),
-            new JsonDao<>("habitaciones_estandar.json", HabitacionEstandar.class));
+    // El repositorio guarda y carga los datos; el controlador solo le pide que lo haga.
+    private final HabitacionRepository repositorio = new HabitacionRepository(new HabitacionJsonDao());
+    // Lista observable: lo que se agregue o quite aquí se refleja de inmediato en la tabla.
     private final ObservableList<Habitacion> datosTabla = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {
-        // El selector muestra el texto de ayuda también cuando no hay selección.
+        // Un ComboBox sin selección no muestra su texto de ayuda (promptText) por sí solo.
+        // Esta celda personalizada escribe ese texto cuando no hay ningún elemento elegido.
         cbTipo.setButtonCell(new ListCell<>() {
             @Override
             protected void updateItem(String item, boolean vacio) {
@@ -67,21 +69,30 @@ public class MainController {
                 setText(vacio || item == null ? cbTipo.getPromptText() : item);
             }
         });
+        // Cada vez que el usuario cambia el tipo, se habilitan solo los campos de ese tipo.
+        // (obs, anterior, nuevo) -> ... es una lambda: función corta que JavaFX ejecuta en cada cambio.
         cbTipo.valueProperty().addListener((obs, anterior, nuevo) -> actualizarCamposPorTipo());
 
+        // setCellValueFactory le dice a cada columna qué texto mostrar en cada fila.
+        // celda.getValue() es el objeto de esa fila; se envuelve en un SimpleStringProperty
+        // porque la columna espera una "propiedad" y no un String suelto.
+        // El tipo y el valor calculado no son atributos, por eso se piden con sus métodos del modelo.
         colTipo.setCellValueFactory(celda -> new SimpleStringProperty(celda.getValue().getTipo()));
         colNumero.setCellValueFactory(celda -> new SimpleStringProperty(celda.getValue().getNumero()));
         colPiso.setCellValueFactory(celda -> new SimpleStringProperty(String.valueOf(celda.getValue().getPiso())));
         colCapacidad.setCellValueFactory(celda -> new SimpleStringProperty(String.valueOf(celda.getValue().getCapacidad())));
         colCosto.setCellValueFactory(celda -> new SimpleStringProperty(
                 FORMATO_MONEDA.format(celda.getValue().calcularTarifa())));
+        // Enlaza la tabla con la lista observable: la tabla mostrará lo que tenga datosTabla.
         tabla.setItems(datosTabla);
 
+        // Al abrir la ventana no hay tipo elegido, así que todos los campos específicos quedan deshabilitados.
+        // Luego se leen los archivos JSON; si falla la lectura, se avisa en la ventana y la app sigue.
         actualizarCamposPorTipo();
         try {
             repositorio.cargar();
         } catch (PersistenciaException e) {
-            mostrarError(e.getMessage());
+            mostrarMensaje(e.getMessage());
         }
         refrescarTabla();
     }
@@ -89,29 +100,33 @@ public class MainController {
     @FXML
     private void onRegistrar() {
         try {
+            // Valida el formulario y crea el objeto; si algún dato es inválido lanza IllegalArgumentException.
             Habitacion nuevo = construirDesdeFormulario();
             repositorio.agregar(nuevo);
             refrescarTabla();
-            mostrarExito(nuevo.getNumero() + " (" + nuevo.getTipo() + ") registrada correctamente.");
+            mostrarMensaje(nuevo.getNumero() + " (" + nuevo.getTipo() + ") registrada correctamente.");
             limpiarFormulario();
+        // Un solo catch para dos tipos de error: dato inválido (formulario o modelo) y falla al guardar archivos.
+        // En ambos casos el mensaje del error se muestra en la ventana, no en la consola.
         } catch (IllegalArgumentException | PersistenciaException e) {
-            mostrarError(e.getMessage());
+            mostrarMensaje(e.getMessage());
         }
     }
 
     @FXML
     private void onEliminar() {
         Habitacion seleccionado = tabla.getSelectionModel().getSelectedItem();
+        // getSelectedItem() devuelve null cuando no hay ninguna fila seleccionada.
         if (seleccionado == null) {
-            mostrarError("Debe seleccionar una habitación de la tabla para eliminarla.");
+            mostrarMensaje("Debe seleccionar una habitación de la tabla para eliminarla.");
             return;
         }
         try {
             repositorio.eliminar(seleccionado);
             refrescarTabla();
-            mostrarExito(seleccionado.getNumero() + " (" + seleccionado.getTipo() + ") eliminada correctamente.");
+            mostrarMensaje(seleccionado.getNumero() + " (" + seleccionado.getTipo() + ") eliminada correctamente.");
         } catch (PersistenciaException e) {
-            mostrarError(e.getMessage());
+            mostrarMensaje(e.getMessage());
         }
     }
 
@@ -120,6 +135,7 @@ public class MainController {
      * IllegalArgumentException con el campo y el motivo si algún dato no es válido.
      */
     private Habitacion construirDesdeFormulario() {
+        // getValue() devuelve null si no se eligió ningún tipo en el selector.
         String tipo = cbTipo.getValue();
         if (tipo == null) {
             throw new IllegalArgumentException("Tipo: debe seleccionar un tipo de habitación.");
@@ -128,9 +144,12 @@ public class MainController {
         int piso = leerEntero(txtPiso, "Piso", 1, 20, "debe estar entre 1 y 20.");
         int capacidad = leerEntero(txtCapacidad, "Capacidad (huéspedes)", 1, Integer.MAX_VALUE, "debe ser mayor que cero.");
 
+        // Según el tipo elegido se leen solo sus campos específicos y se crea el subtipo correspondiente.
+        // Se compara con la constante a la izquierda para evitar errores si tipo fuera null.
         if (TIPO_HABITACION_SUITE.equals(tipo)) {
             String vista = leerTexto(txtVista, "Vista");
             HabitacionSuite habitacionSuite = new HabitacionSuite(numero, piso, capacidad, vista, chkDesayunoBuffet.isSelected());
+            // El constructor deja este dato en falso; si la casilla está marcada se activa con el método de la interfaz.
             if (chkLateCheckout.isSelected()) {
                 habitacionSuite.activarLateCheckout();
             }
@@ -154,10 +173,12 @@ public class MainController {
     private int leerEntero(TextField campo, String nombre, int minimo, int maximo, String regla) {
         int valor;
         try {
+            // parseInt lanza NumberFormatException si el texto no es un número entero (por ejemplo "abc" o "2.5").
             valor = Integer.parseInt(campo.getText().trim());
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException(nombre + ": debe ser un número entero.");
         }
+        // Integer.MAX_VALUE como máximo significa "sin límite superior".
         if (valor < minimo || valor > maximo) {
             throw new IllegalArgumentException(nombre + ": " + regla);
         }
@@ -167,6 +188,7 @@ public class MainController {
     private double leerDecimalPositivo(TextField campo, String nombre) {
         double valor;
         try {
+            // Se cambia la coma por punto para aceptar "22,5" y "22.5"; parseDouble solo entiende el punto.
             valor = Double.parseDouble(campo.getText().trim().replace(',', '.'));
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException(nombre + ": debe ser un número (se aceptan decimales).");
@@ -182,6 +204,8 @@ public class MainController {
         String tipo = cbTipo.getValue();
         boolean esHabitacionSuite = TIPO_HABITACION_SUITE.equals(tipo);
         boolean esHabitacionEstandar = TIPO_HABITACION_ESTANDAR.equals(tipo);
+        // setDisable(true) bloquea el control. Se deshabilita todo campo que NO pertenece al tipo elegido,
+        // y se vacía para que no quede un valor viejo que se confunda al registrar.
         txtVista.setDisable(!esHabitacionSuite);
         if (!esHabitacionSuite) {
             txtVista.clear();
@@ -204,21 +228,17 @@ public class MainController {
         txtNumero.clear();
         txtPiso.clear();
         txtCapacidad.clear();
+        // null deja el selector sin elección (vuelve a verse el texto de ayuda).
         cbTipo.setValue(null);
         actualizarCamposPorTipo();
     }
 
     private void refrescarTabla() {
+        // setAll reemplaza todo el contenido de la lista observable; la tabla se redibuja sola.
         datosTabla.setAll(repositorio.listar());
     }
 
-    private void mostrarExito(String mensaje) {
-        lblMensaje.setStyle(COLOR_OK);
-        lblMensaje.setText(mensaje);
-    }
-
-    private void mostrarError(String mensaje) {
-        lblMensaje.setStyle(COLOR_ERROR);
+    private void mostrarMensaje(String mensaje) {
         lblMensaje.setText(mensaje);
     }
 }
