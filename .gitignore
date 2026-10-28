@@ -9,3 +9,6 @@ out/
 .vscode/
 *.swp
 .DS_Store
+
+# Material de la prueba (no subir)
+prueba/
